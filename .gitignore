@@ -1,2 +1,3 @@
-~/project/data/*
-~/prpject/presentation/*
+data/
+presentation/
+__pycache__/
