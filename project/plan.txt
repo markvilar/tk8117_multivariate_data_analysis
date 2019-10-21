@@ -1,0 +1,8 @@
+Possible problems:
+- PCA for denoising
+- Image segmentation based on linear regression
+- Image segmentation based on k-means
+- Anomality detection
+- Image classification based on LDA
+- Image classification based on SVM
+- Image classification based on K nearest neighbours
