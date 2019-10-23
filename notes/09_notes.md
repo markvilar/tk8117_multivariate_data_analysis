@@ -54,5 +54,5 @@ Example: Oslo HSI
 
 ## Preprocesssing
 
-1) MSC
+1) MSC (multiplicative signal correction)
 2) Extended MSC
