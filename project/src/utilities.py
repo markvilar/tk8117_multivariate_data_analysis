@@ -2,19 +2,20 @@
 import h5py
 import os
 import numpy as np
-from typing import List, Dict
+from typing import List, Dict, Tuple
 from queue import Queue
 
 def read_h5_file(dir_path: str, file_name: str, search_keys: List[str], queue_size: int) -> Dict[str, np.ndarray]:
+    ''' Returns all the datasets from a h5 file as a dictionary. '''
+    # File paths
     file_path = dir_path + '/' + file_name
     assert file_name.lower().endswith('.h5'), 'File is not a h5 file: {}'.format(file_name)
     assert os.path.exists(dir_path), 'Folder does not exist: {}'.format(os.path.abspath(dir_path))
     assert os.path.isfile(file_path), 'File does not exist: {}'.format(os.path.abspath(file_path))
-
     search_keys = [x.lower() for x in search_keys]
     datasets = dict()
     group_queue = Queue(queue_size)
-
+    # Extract datasets
     with h5py.File(file_path, 'r') as f:
         for key, value in f.items():
             if isinstance(value, h5py.Group):
@@ -35,7 +36,6 @@ def read_h5_file(dir_path: str, file_name: str, search_keys: List[str], queue_si
                         arr = np.empty(shape=value.shape, dtype=value.dtype)
                         value.read_direct(arr)
                         datasets[key] = arr
-    
     return datasets
 
 def remove_dict_keys(data: Dict, to_remove: List):
@@ -44,10 +44,29 @@ def remove_dict_keys(data: Dict, to_remove: List):
         del data[key]
     return data
 
-def read_h5_example():
-    datasets = read_h5_file('../datasets/archaeology', 'ark_20170927_152616_1.h5', ['roll', 'rollrate', 'pitch', 'imu', 'rgbframes', 'timestamp', 'timestampmeasured'], 500)
-    for key, value in datasets.items():
-        print('key: {}, value: {}'.format(key, value.dtype))
+def print_dict_entries(x: Dict):
+    ''' Prints the key and value type for every dictionary entry. '''
+    for key, value in x.items():
+        print('key: {}, value: {}'.format(key, type(value)))
 
-if __name__ == "__main__":
-    read_h5_example()
+def print_array_info(x: np.ndarray):
+    ''' Prints the shape and data type of a numpy array. '''
+    print('shape: {}, dtype: {}'.format(x.shape, x.dtype))
+
+def one_hot_encode(labels: np.ndarray) -> Tuple[Dict, np.ndarray]:
+    ''' One hot encodes labels. 
+    arg labels: WxHxP np.array of uints
+    return: tuple of dict and np.ndarray '''
+    width, height = labels.shape
+    flat = labels.flatten()
+    n_samples = flat.shape[0]
+    classes = np.unique(labels)
+    n_classes = len(classes)
+    if n_classes < 256:
+        data_type = np.uint8
+    else:
+        data_type = np.uint16
+    encoded_labels = np.zeros((n_samples, n_classes), dtype=data_type)
+    encoded_labels[np.arange(n_samples), flat] = 1
+    encoded_labels = encoded_labels.reshape((width, height, n_classes))
+    return encoded_labels
