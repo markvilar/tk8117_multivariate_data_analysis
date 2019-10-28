@@ -38,7 +38,16 @@ def read_h5_file(dir_path: str, file_name: str, search_keys: List[str], queue_si
     
     return datasets
 
-if __name__ == "__main__":
-    datasets = read_h5_file('../data', 'ark_20170927_152616_1.h5', ['roll', 'rollrate', 'pitch', 'imu', 'rgbframes', 'timestamp', 'timestampmeasured'], 500)
+def remove_dict_keys(data: Dict, to_remove: List):
+    ''' Remove the dictionary entries based on the entry key. '''
+    for key in to_remove:
+        del data[key]
+    return data
+
+def read_h5_example():
+    datasets = read_h5_file('../datasets/archaeology', 'ark_20170927_152616_1.h5', ['roll', 'rollrate', 'pitch', 'imu', 'rgbframes', 'timestamp', 'timestampmeasured'], 500)
     for key, value in datasets.items():
         print('key: {}, value: {}'.format(key, value.dtype))
+
+if __name__ == "__main__":
+    read_h5_example()

@@ -1,11 +1,22 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from utilities import read_h5_file
+from dataloaders import IndianPinesDataloader
+
+def data_inspection(dataloader):
+    raise NotImplementedError
+
+def data_preprocess(dataloader):
+    raise NotImplementedError
+
+def lda_classification(dataloader):
+    raise NotImplementedError
+
+def svm_classification(dataloader):
+    raise NotImplementedError
 
 def main():
-    datasets = read_h5_file('../data', 'Ark_20170630_085421_1.h5', ['xacceleration', 'yacceleration', 'zacceleration'], 500)
-    plt.plot(datasets['/rawdata/navigation/imu/ZAcceleration'])
+    raise NotImplementedError
 
 if __name__ == '__main__':
     main()
