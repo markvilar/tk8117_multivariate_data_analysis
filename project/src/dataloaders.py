@@ -52,7 +52,8 @@ class IndianPinesDataloader():
 def example_IP_dataloader():
     dataloader = IndianPinesDataloader('../datasets/classification/indian_pines', 
             'indian_pines.mat', 'calibration.mat', 'indian_pines_gt.mat')
-    dataloader.create_test_set(0.2)
+    print_dict_entries(dataloader._rawdata)
+    print_array_info(dataloader._rawdata['data'])
 
 if __name__ == '__main__':
     example_IP_dataloader()
