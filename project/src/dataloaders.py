@@ -3,11 +3,14 @@ import os
 import scipy
 import scipy.io
 import numpy as np
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
 from typing import Dict
 
-from utilities import remove_dict_keys, print_dict_entries, print_array_info, one_hot_encode
+from utilities import remove_dict_keys, create_table, one_hot_encode
+from preprocess import median_reference, normalize
 
 class IndianPinesDataloader():
     def __init__(self, dir_path: str, data_file: str, cali_file: str, labels_file: str):
@@ -29,23 +32,14 @@ class IndianPinesDataloader():
         self._paths = paths
         # Load files
         mat_headers = ['__header__', '__version__', '__globals__']
-        data = remove_dict_keys(scipy.io.loadmat(data_path), mat_headers)['data']
-        cali = remove_dict_keys(scipy.io.loadmat(cali_path), mat_headers) # channels, centers, centerStds, fwhm, fwhmStds, scale, offset
+        samples = remove_dict_keys(scipy.io.loadmat(data_path), mat_headers)['data']
+        cali = remove_dict_keys(scipy.io.loadmat(cali_path), mat_headers)
         labels = remove_dict_keys(scipy.io.loadmat(labels_path), mat_headers)['labels']
-        self._raw_data = data
+        self._samples = samples
         self._calibration = cali
         self._labels = labels
-        self._processed_data = None
-
-    def preprocess_data(self):
-        ''' Preprocesses the data by dividing the spectras of the samples with the 
-        median spectra. '''
-        data = self._raw_data
-        width, height, n_channels = data.shape
-        data = data.reshape(-1, data.shape[-1])
-        medians = np.median(data, axis=0)
-        processed_data = data/medians
-        self._processed_data = processed_data
+        self._X = create_table(samples)
+        self._Y = create_table(labels)
 
     def create_test_set(self, test_frac: float):
         ''' Partitions the data into a test set and a training set. 
@@ -61,7 +55,6 @@ class IndianPinesDataloader():
 def example_IP_dataloader():
     dataloader = IndianPinesDataloader('../datasets/classification/indian_pines', 
             'indian_pines_corrected.mat', 'calibration_corrected.mat', 'indian_pines_gt.mat')
-    dataloader.preprocess_data()
 
 if __name__ == '__main__':
     example_IP_dataloader()

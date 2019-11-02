@@ -2,6 +2,9 @@
 import h5py
 import os
 import numpy as np
+import matplotlib
+matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt
 from typing import List, Dict, Tuple
 from queue import Queue
 
@@ -66,6 +69,14 @@ def print_dict_entries(x: Dict):
 def print_array_info(x: np.ndarray):
     ''' Prints the shape and data type of a numpy array. '''
     print('shape: {}, dtype: {}'.format(x.shape, x.dtype))
+
+def create_table(x: np.ndarray) -> np.ndarray:
+    ''' Reshapes an ND array to 2D.
+    arg x: ND array
+    return; 2D array '''
+    if x.ndim <= 2:
+        return x.reshape(-1)
+    return x.reshape(-1, x.shape[-1])
 
 def one_hot_encode(labels: np.ndarray) -> Tuple[Dict, np.ndarray]:
     ''' One hot encodes labels. 
