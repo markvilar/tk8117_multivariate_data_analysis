@@ -1,5 +1,6 @@
 #!usr/bin/env Python
 import os
+import scipy
 import scipy.io
 import numpy as np
 import matplotlib.pyplot as plt
@@ -29,19 +30,27 @@ class IndianPinesDataloader():
         # Load files
         mat_headers = ['__header__', '__version__', '__globals__']
         data = remove_dict_keys(scipy.io.loadmat(data_path), mat_headers)['data']
-        cali = remove_dict_keys(scipy.io.loadmat(cali_path), mat_headers)
+        cali = remove_dict_keys(scipy.io.loadmat(cali_path), mat_headers) # channels, centers, centerStds, fwhm, fwhmStds, scale, offset
         labels = remove_dict_keys(scipy.io.loadmat(labels_path), mat_headers)['labels']
-        self._rawdata = {'data': data, 'calibration': cali, 'labels': labels}
+        self._raw_data = data
+        self._calibration = cali
+        self._labels = labels
         self._processed_data = None
+
+    def preprocess_data(self):
+        ''' Preprocesses the data by dividing the spectras of the samples with the 
+        median spectra. '''
+        data = self._raw_data
+        width, height, n_channels = data.shape
+        data = data.reshape(-1, data.shape[-1])
+        medians = np.median(data, axis=0)
+        processed_data = data/medians
+        self._processed_data = processed_data
 
     def create_test_set(self, test_frac: float):
         ''' Partitions the data into a test set and a training set. 
         arg test_frac: float, the fraction of the data used for testing '''
         assert test_frac > 0 and test_frac < 1, 'Fraction of test data must be between 0 and 1.'
-        data = self._rawdata['data']
-        labels = self._rawdata['labels']
-        
-        encoded_labels = one_hot_encode(labels)
         raise NotImplementedError
 
     def create_validation_folds(self, k: int):
@@ -51,9 +60,8 @@ class IndianPinesDataloader():
 
 def example_IP_dataloader():
     dataloader = IndianPinesDataloader('../datasets/classification/indian_pines', 
-            'indian_pines.mat', 'calibration.mat', 'indian_pines_gt.mat')
-    print_dict_entries(dataloader._rawdata)
-    print_array_info(dataloader._rawdata['data'])
+            'indian_pines_corrected.mat', 'calibration_corrected.mat', 'indian_pines_gt.mat')
+    dataloader.preprocess_data()
 
 if __name__ == '__main__':
     example_IP_dataloader()
