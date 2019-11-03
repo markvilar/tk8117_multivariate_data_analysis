@@ -7,7 +7,7 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
-from typing import Dict
+from typing import Dict, Tuple
 
 from utilities import remove_dict_keys, create_table, one_hot_encode
 from preprocess import median_reference, normalize
@@ -24,10 +24,14 @@ class IndianPinesDataloader():
         data_path = dir_path + '/' + data_file
         cali_path = dir_path + '/' + cali_file
         labels_path = dir_path + '/' + labels_file
-        assert os.path.exists(dir_path), 'Folder does not exist: {}'.format(os.path.abspath(dir_path))
-        assert os.path.isfile(data_path), 'File does not exist: {}'.format(os.path.abspath(data_path))
-        assert os.path.isfile(cali_path), 'File does not exist: {}'.format(os.path.abspath(cali_path))
-        assert os.path.isfile(labels_path), 'File does not exist: {}'.format(os.path.abspath(labels_path))
+        assert os.path.exists(dir_path), 'Folder does not exist: {}'.format(
+                os.path.abspath(dir_path))
+        assert os.path.isfile(data_path), 'File does not exist: {}'.format(
+                os.path.abspath(data_path))
+        assert os.path.isfile(cali_path), 'File does not exist: {}'.format(
+                os.path.abspath(cali_path))
+        assert os.path.isfile(labels_path), 'File does not exist: {}'.format(
+                os.path.abspath(labels_path))
         paths = {'data': data_path, 'calibration': cali_path, 'labels': labels_path}
         self._paths = paths
         # Load files
@@ -40,6 +44,9 @@ class IndianPinesDataloader():
         self._labels = labels
         self._X = create_table(samples)
         self._Y = create_table(labels)
+
+    def get_tables(self) -> Tuple[np.ndarray, np.ndarray]:
+        return self._X.copy(), self._Y.copy()
 
     def create_test_set(self, test_frac: float):
         ''' Partitions the data into a test set and a training set. 
