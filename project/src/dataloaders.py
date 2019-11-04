@@ -39,11 +39,43 @@ class IndianPinesDataloader():
         samples = remove_dict_keys(scipy.io.loadmat(data_path), mat_headers)['data']
         cali = remove_dict_keys(scipy.io.loadmat(cali_path), mat_headers)
         labels = remove_dict_keys(scipy.io.loadmat(labels_path), mat_headers)['labels']
-        self._samples = samples
+        self._samples = samples # scans, sensors, channels
         self._calibration = cali
         self._labels = labels
-        self._X = create_table(samples)
-        self._Y = create_table(labels)
+        self._spec_rads = None
+        self._rads = None
+        self._X = None
+        self._Y = None
+
+    def get_samples(self):
+        return self._samples.copy()
+
+    def set_rads(self, x: np.ndarray):
+        self._rads = x
+
+    def get_rads(self) -> np.ndarray:
+        return self._rads.copy()
+
+    def set_spec_rads(self, x: np.ndarray):
+        self._spec_rads = x
+
+    def get_spec_rads(self) -> np.ndarray:
+        return self._spec_rads.copy()
+
+    def get_calibration(self, key: str=None) -> Dict:
+        if key in self._calibration:
+            return self._calibration[key]
+        elif key == None:
+            return self._calibration
+        else:
+            return None
+
+    def get_labels(self) -> np.ndarray:
+        return self._labels.copy()
+
+    def set_tables(self, X: np.ndarray, Y: np.ndarray):
+        assert X.ndims == 2, 'Wrong dimensionality. Dimensionality of X: {}\n'.format(X.ndims)
+        assert Y.ndims == 2, 'Wrong dimensionality. Dimensionality of Y: {}\n'.format(Y.ndims)
 
     def get_tables(self) -> Tuple[np.ndarray, np.ndarray]:
         return self._X.copy(), self._Y.copy()
