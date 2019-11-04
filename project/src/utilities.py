@@ -82,9 +82,7 @@ def one_hot_encode(labels: np.ndarray) -> Tuple[Dict, np.ndarray]:
     ''' One hot encodes labels. 
     arg labels: WxHxP np.array of uints
     return: tuple of dict and np.ndarray '''
-    width, height = labels.shape
-    flat = labels.flatten()
-    n_samples = flat.shape[0]
+    n_samples = len(labels)
     classes = np.unique(labels)
     n_classes = len(classes)
     if n_classes < 256:
@@ -92,6 +90,6 @@ def one_hot_encode(labels: np.ndarray) -> Tuple[Dict, np.ndarray]:
     else:
         data_type = np.uint16
     encoded_labels = np.zeros((n_samples, n_classes), dtype=data_type)
-    encoded_labels[np.arange(n_samples), flat] = 1
-    encoded_labels = encoded_labels.reshape((width, height, n_classes))
+    encoded_labels[np.arange(n_samples), labels] = 1
+    encoded_labels = encoded_labels.reshape((n_samples, n_classes))
     return encoded_labels
