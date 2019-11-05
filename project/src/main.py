@@ -3,7 +3,11 @@ import matplotlib as mpl
 mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 from sklearn import decomposition
+<<<<<<< HEAD
 from sklearn import cross_decomposition
+=======
+from sklearn import cross_decomposition 
+>>>>>>> 8ae3220e7696c9d58066d544dad030a38b62e0b9
 from mpl_toolkits import mplot3d
 
 from dataloaders import IndianPinesDataloader
