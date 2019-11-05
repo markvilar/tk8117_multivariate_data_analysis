@@ -1,13 +1,13 @@
 import numpy as np
-import matplotlib
-matplotlib.use('TkAgg')
+import matplotlib as mpl
+mpl.use('TkAgg')
 import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA
-from sklearn.cross_decomposition import PLSRegression
+from sklearn import decomposition
+from sklearn import cross_decomposition
 from mpl_toolkits import mplot3d
 
 from dataloaders import IndianPinesDataloader
-from utilities import print_array_info, create_table, one_hot_encode
+from utilities import print_array_info, create_table, one_hot_encode, moving_average
 
 def data_calibration(dataloader):
     # Rawdata
@@ -53,21 +53,28 @@ def data_inspection(dataloader, plot: bool):
         plt.ylabel('Radiance [Wm^(-2)sr^(-1)]')
         plt.show()
 
-def pls_inspection(dataloader, plot: bool):
+def pca_inspection(dataloader, plot: bool):
     rads = dataloader.get_rads()
     labels = dataloader.get_labels()
     X = create_table(rads)
     labels = create_table(labels)
-    Y = one_hot_encode(labels)
+    n_classes = len(np.unique(labels))
+
     # PLS
-    pls = PLSRegression(6)
-    x_scores, y_scores = pls.fit_transform(X, Y)
-    loadings = pls.x_loadings_
-    # Variance
-    x_var = np.var(x_scores, axis=0)
-    tot_var = np.sum(x_var)
-    var_ratios = x_var / tot_var
+    pca = decomposition.PCA()
+    scores = pca.fit_transform(X)
+    loadings = pca.components_
+    var_ratios = pca.explained_variance_ratio_
     cum_var_ratios = np.cumsum(var_ratios)
+
+    # Colormap
+    cmap = plt.cm.jet
+    cmaplist = [cmap(i) for i in range(cmap.N)]
+    cmap = mpl.colors.LinearSegmentedColormap.from_list('Custom map',
+            cmaplist, cmap.N)
+    bounds = np.linspace(0, n_classes, n_classes+1)
+    norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
+
     if plot:
         # Explained variance plot
         plt.figure(num=3, figsize=(8,6))
@@ -78,17 +85,33 @@ def pls_inspection(dataloader, plot: bool):
         plt.xlim((0, 10))
         plt.ylim((0, 1))
 
-        # 2D scores plot
+        # Loadings plot
         plt.figure(num=4, figsize=(8,6))
-        plt.scatter(x_scores[:,0], x_scores[:,1], s=1, c=labels)
+        plt.plot(loadings[0,:])
+        plt.title('PC1 loadings')
+        
+        plt.figure(num=5, figsize=(8,6))
+        plt.plot(loadings[1,:])
+        plt.title('PC2 loadings')
+
+        # 2D scores plot
+        plt.figure(num=6, figsize=(8,6))
+        scat = plt.scatter(scores[:,0], scores[:,1], c=labels, s=1,
+                cmap=cmap, norm=norm)
+        cb = plt.colorbar(scat, spacing='proportional', ticks=bounds)
+        cb.set_label('Classes')
         plt.title('Scores plot')
         plt.xlabel('PC1 ({:.2f}% explained variance)'.format(var_ratios[0]*100))
         plt.ylabel('PC2 ({:.2f}% explained variance)'.format(var_ratios[1]*100))
 
         # 3D scores plot
-        fig = plt.figure(num=5, figsize=(8,6))
+        fig = plt.figure(num=7, figsize=(8,6))
         ax = fig.add_subplot(111, projection='3d')
-        ax.scatter(x_scores[:,0], x_scores[:,1], x_scores[:,2], c=labels)
+        scat = ax.scatter(scores[:,0], scores[:,1], scores[:,2], c=labels, s=1,
+                cmap=cmap, norm=norm)
+        cb = plt.colorbar(scat, spacing='proportional', ticks=bounds)
+        cb.set_label('Classes')
+        ax.set_title('Scores plot')
         ax.set_xlabel('PC1 ({:.2f}% explained variance)'.format(var_ratios[0]*100))
         ax.set_ylabel('PC2 ({:.2f}% explained variance)'.format(var_ratios[1]*100))
         ax.set_zlabel('PC3 ({:.2f}% explained variance)'.format(var_ratios[2]*100))
@@ -97,7 +120,7 @@ def pls_inspection(dataloader, plot: bool):
 
 def data_preprocess(dataloader, plot: bool):
     rads = dataloader.get_rads()
-
+    smoothed_rads = moving_average(rads, 5)
 
 def lda_classification(dataloader):
     raise NotImplementedError
@@ -113,8 +136,8 @@ def main():
     dataloader = IndianPinesDataloader(dir_path, data_file, cali_file, labels_file)
     data_calibration(dataloader)
     data_inspection(dataloader, False)
-    data_preprocess(dataloader, True)
-    pls_inspection(dataloader, True)
+    #data_preprocess(dataloader, True)
+    pca_inspection(dataloader, True)
 
 if __name__ == '__main__':
     main()
