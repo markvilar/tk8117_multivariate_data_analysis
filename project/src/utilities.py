@@ -93,3 +93,6 @@ def one_hot_encode(labels: np.ndarray) -> Tuple[Dict, np.ndarray]:
     encoded_labels[np.arange(n_samples), labels] = 1
     encoded_labels = encoded_labels.reshape((n_samples, n_classes))
     return encoded_labels
+
+def moving_average(x: np.ndarray, w: int) -> np.ndarray:
+    raise NotImplementedError
