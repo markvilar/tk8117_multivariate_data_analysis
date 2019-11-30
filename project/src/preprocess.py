@@ -9,3 +9,9 @@ def normalize(x: np.ndarray):
     means = np.mean(x, axis=0)
     stds = np.std(x, axis=0)
     return (x-means) / stds
+
+def moving_average(x: np.ndarray, w: int):
+    return np.convolve(x, np.ones(w), 'valid') / w
+
+def snv(x: np.ndarray, axis=0: int):
+    raise NotImplementedError
