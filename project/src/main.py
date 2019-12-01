@@ -10,7 +10,7 @@ from dataloader import Dataloader
 from utilities import print_array_info, create_table, create_test_set
 from plotting import data_inspection, pca_inspection
 
-def data_analysis(dataloader: Dataloader):
+def data_inspection(dataloader: Dataloader):
     # Calibrate data and create tables
     X = dataloader.get_calibrated_samples()
     Y = dataloader.get_labels()
@@ -19,7 +19,7 @@ def data_analysis(dataloader: Dataloader):
     # Select subset(?)
 
     # Create training and test set
-    X_train, Y_train, X_test, Y_test = create_test_set(X, Y, frac=0.25)
+    X_train, Y_train, X_test, Y_test = create_test_set(X, Y, frac=0.30)
 
     # Data inspection
 
@@ -31,6 +31,8 @@ def data_analysis(dataloader: Dataloader):
 
     # PCA inspection
 
+    return X_train, Y_train, X_test, Y_test
+
 def linear_classification():
     raise NotImplementedError
 
@@ -38,6 +40,9 @@ def nonlinear_classification():
     raise NotImplementedError
 
 def main():
+    # Set seed for reproducability
+    np.random.seed(6969)
+
     # Load data
     dir_path = '../datasets/classification/indian_pines'
     data_file = 'indian_pines.mat'
@@ -46,7 +51,7 @@ def main():
     dataloader = Dataloader(dir_path, data_file, cali_file, labels_file)
     
     # Data inspection, PCA inspection and outlier detection
-    data_analysis(dataloader)
+    data_inspection(dataloader)
 
     # Linear classification
 

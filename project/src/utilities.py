@@ -45,10 +45,28 @@ def create_table(x: np.ndarray) -> np.ndarray:
         return x.reshape(-1)
     return x.reshape(-1, x.shape[-1])
 
-def create_test_set(X: np.ndarray, Y: np.ndarray, frac: float):
-    
-    raise NotImplementedError
+def create_test_set(X: np.ndarray, Y: np.ndarray, frac: float) -> Tuple[np.ndarray]:
+    assert X.ndim == 2, "X must be a 2D array."
+    assert Y.ndim == 1, "Y must be a 1D array."
+    assert frac < 1 or frac > 0, "Invalid test set fraction."
+    classes = np.unique(Y)
+    inds = np.arange(X.shape[0], dtype=int)
+    test_inds = []
+    for c in classes:
+        c_inds = np.where(Y==c)[0]
+        n = int(c_inds.shape[0])
+        n_test = int(np.floor(n*frac))
+        test_inds += (np.random.choice(c_inds, n_test, replace=False)).tolist()
+    test_inds = np.array(test_inds, dtype=int)
+    train_inds = np.setdiff1d(inds, test_inds)
+    X_test = np.take(X, test_inds, axis=0)
+    Y_test = np.take(Y, test_inds, axis=0)
+    X_train = np.take(X, train_inds, axis=0)
+    Y_train = np.take(Y, train_inds, axis=0)
     return X_train, Y_train, X_test, Y_test
+
+def create_folds(X: np.ndarray) -> List[np.ndarray]:
+    raise NotImplementedError
 
 def one_hot_encode(labels: np.ndarray) -> Tuple[Dict, np.ndarray]:
     ''' One hot encodes labels. 
@@ -65,5 +83,3 @@ def one_hot_encode(labels: np.ndarray) -> Tuple[Dict, np.ndarray]:
     encoded_labels[np.arange(n_samples), labels] = 1
     encoded_labels = encoded_labels.reshape((n_samples, n_classes))
     return encoded_labels
-
-
