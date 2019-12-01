@@ -4,33 +4,16 @@ mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 from sklearn import decomposition
 
-def data_inspection(dataloader, plot: bool):
-    spec_rads = dataloader.get_spec_rads()
-    rads = dataloader.get_rads()
-    centers = dataloader.get_calibration('centers')
-    centers = np.squeeze(centers)
-    # Extract fake RGB
-    rgb_img = np.take(spec_rads, [19,15,4], axis=2)
-    rgb_img *= (1 / np.max(rgb_img))
-    # Plots
-    if plot:
-        # Fake RGB plot
-        plt.figure(num=0, figsize=(6,6))
-        plt.imshow(rgb_img)
-        plt.tick_params(axis='both', which='both', bottom=False, top=False,
-                left=False, right=False, labelbottom=False, labeltop=False,
-                labelleft=False, labelright=False)
-        # Spectral Radiance plot
-        plt.figure(num=1, figsize=(8,6))
-        plt.plot(centers, spec_rads[0,:,:].T)
-        plt.xlabel('Wavelength [nm]')
-        plt.ylabel('Spectral Radiance [Wm^(-2)nm^(-1)sr^(-1)]')
-        # Radiance plot
-        plt.figure(num=2, figsize=(8,6))
-        plt.plot(centers, rads[0,:,:].T)
-        plt.xlabel('Wavelength [nm]')
-        plt.ylabel('Radiance [Wm^(-2)sr^(-1)]')
-        plt.show()
+from typing import Tuple
+
+def plot2D(x: np.ndarray, y: np.ndarray, c: np.ndarray, num: int, size: Tuple[int, int]):
+    plt.figure(num=num, figsize=size)
+    plt.plot(x.T, y.T)
+    plt.show()
+
+def plot_spectras(wave_lengths: np.ndarray, samples: np.ndarray, labels: np.ndarray, num: int, size: Tuple[int, int]):
+    wave_lengths = np.tile(wave_lengths, (samples.shape[0], 1))
+    plot2D(wave_lengths, samples, labels, num, size)
 
 def pca_inspection(dataloader, plot: bool):
     rads = dataloader.get_rads()

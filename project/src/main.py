@@ -8,10 +8,11 @@ from mpl_toolkits import mplot3d
 
 from dataloader import Dataloader
 from utilities import print_array_info, create_table, create_test_set
-from plotting import data_inspection, pca_inspection
+from plotting import plot_spectras, pca_inspection
 
 def data_inspection(dataloader: Dataloader):
     # Calibrate data and create tables
+    wave_lengths = np.squeeze(dataloader.get_calibration('centers'))
     X = dataloader.get_calibrated_samples()
     Y = dataloader.get_labels()
     X, Y = create_table(X), create_table(Y)
@@ -22,6 +23,7 @@ def data_inspection(dataloader: Dataloader):
     X_train, Y_train, X_test, Y_test = create_test_set(X, Y, frac=0.30)
 
     # Data inspection
+    plot_spectras(wave_lengths, X_train[0:200,:], Y_train[0:200], 1, (8, 6))
 
     # PCA inspection
 
