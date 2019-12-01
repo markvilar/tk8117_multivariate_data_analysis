@@ -2,14 +2,13 @@ import numpy as np
 import matplotlib as mpl
 mpl.use('TkAgg')
 import matplotlib.pyplot as plt
-from sklearn import decomposition
-from sklearn import cross_decomposition 
 from mpl_toolkits import mplot3d
 
 from dataloader import Dataloader
 from utilities import print_array_info, create_table, create_test_set
 from plotting import plot_spectras, pca_inspection, create_colormap, kernel_pca_inspection
 from preprocess import snv, subset_selection
+from classifiers import lda, svm
 
 def data_inspection(dataloader: Dataloader, plot: bool):
     # Calibrate data and create tables
@@ -53,8 +52,13 @@ def data_inspection(dataloader: Dataloader, plot: bool):
 
     return X_train, Y_train, X_test, Y_test
 
-def linear_classification():
-    raise NotImplementedError
+def linear_classification(X_train: np.ndarray, Y_train: np.ndarray, X_test: np.ndarray,
+        Y_test: np.ndarray):
+    # Create k-folds
+    # PCA - CV
+    # LDA - CV
+    # LDA - test
+    #lda(X_train, Y_train, X_test, Y_test)
 
 def nonlinear_classification():
     raise NotImplementedError
@@ -74,7 +78,7 @@ def main():
     X_train, Y_train, X_test, Y_test = data_inspection(dataloader, plot=False)
 
     # Linear classification
-    
+    linear_classification(X_train, Y_train, X_test, Y_test)
 
     # Non-linear classification
 
