@@ -13,5 +13,16 @@ def normalize(x: np.ndarray):
 def moving_average(x: np.ndarray, w: int):
     return np.convolve(x, np.ones(w), 'valid') / w
 
-def snv(x: np.ndarray, axis=0: int):
-    raise NotImplementedError
+def snv(x: np.ndarray):
+    assert x.ndim == 2, 'x must be a 2D array.'
+    means = np.mean(x, axis=1)
+    stds = np.std(x, axis=1)
+    return (x - means[:, np.newaxis]) / stds[:, np.newaxis]
+
+def subset_selection(x: np.ndarray, indices: np.ndarray):
+    n_features = x.shape[1]
+    mask = np.logical_and(indices < n_features, indices >= 0)
+    indices = indices[mask]
+    indices = np.unique(indices)
+    indices = np.sort(indices)
+    return np.take(x, indices, axis=1)
