@@ -46,7 +46,7 @@ def main():
     np.random.seed(6969)
 
     # Load data
-    dir_path = '../datasets/classification/indian_pines'
+    dir_path = '../datasets/indian_pines'
     data_file = 'indian_pines.mat'
     cali_file = 'calibration.mat'
     labels_file = 'indian_pines_gt.mat'
