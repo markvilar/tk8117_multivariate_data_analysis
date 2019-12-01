@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 from typing import Dict, Tuple
 
-from utilities import remove_dict_keys, create_table, one_hot_encode
+from utilities import remove_dict_keys
 
 class Dataloader():
     def __init__(self, dir_path: str, data_file: str, cali_file: str, labels_file: str):
@@ -38,7 +38,7 @@ class Dataloader():
         samples = remove_dict_keys(scipy.io.loadmat(data_path), mat_headers)['data']
         cali = remove_dict_keys(scipy.io.loadmat(cali_path), mat_headers)
         labels = remove_dict_keys(scipy.io.loadmat(labels_path), mat_headers)['labels']
-        self._samples = samples # scans, sensors, channels
+        self._samples = samples
         self._calibration = cali
         self._labels = labels
 
@@ -55,6 +55,20 @@ class Dataloader():
 
     def get_labels(self) -> np.ndarray:
         return self._labels.copy()
+
+    def get_calibrated_samples(self):
+        # Rawdata
+        samples = self.get_samples().astype(float)
+        cali = self.get_calibration()
+        offset = cali['offset'][0,0]
+        scale = cali['scale'][0,0]
+        centers = np.squeeze(cali['centers'])
+        # Calibration, change of units, non-negativity and radiance
+        spec_rads = (samples - offset) / scale
+        spec_rads /= (0.01)**(-2)
+        spec_rads[spec_rads<0] = 0
+        rads = spec_rads * centers
+        return rads
 
 def example_dataloader():
     dataloader = Dataloader('../datasets/classification/indian_pines', 

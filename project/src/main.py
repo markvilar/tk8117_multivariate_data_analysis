@@ -7,25 +7,35 @@ from sklearn import cross_decomposition
 from mpl_toolkits import mplot3d
 
 from dataloader import Dataloader
-from utilities import print_array_info, create_table, one_hot_encode
+from utilities import print_array_info, create_table, create_test_set
 from plotting import data_inspection, pca_inspection
 
-def data_calibration(dataloader):
-    # Rawdata
-    sdv = dataloader.get_samples().astype(float)
-    labels = dataloader.get_labels()
-    cali = dataloader.get_calibration()
-    offset = cali['offset'][0,0]
-    scale = cali['scale'][0,0]
-    centers = np.squeeze(cali['centers'])
-    # Calibration, change of units, non-negativity and radiance
-    spec_rads = (sdv - offset) / scale
-    spec_rads /= (0.01)**(-2)
-    spec_rads[spec_rads<0] = 0
-    rads = spec_rads * centers
-    X = create_table(rads)
-    Y = create_table(labels)
-    return X, Y
+def data_analysis(dataloader: Dataloader):
+    # Calibrate data and create tables
+    X = dataloader.get_calibrated_samples()
+    Y = dataloader.get_labels()
+    X, Y = create_table(X), create_table(Y)
+
+    # Select subset(?)
+
+    # Create training and test set
+    X_train, Y_train, X_test, Y_test = create_test_set(X, Y, frac=0.25)
+
+    # Data inspection
+
+    # PCA inspection
+
+    # Outlier detection
+
+    # Data inspection 2
+
+    # PCA inspection
+
+def linear_classification():
+    raise NotImplementedError
+
+def nonlinear_classification():
+    raise NotImplementedError
 
 def main():
     # Load data
@@ -34,15 +44,13 @@ def main():
     cali_file = 'calibration.mat'
     labels_file = 'indian_pines_gt.mat'
     dataloader = Dataloader(dir_path, data_file, cali_file, labels_file)
+    
+    # Data inspection, PCA inspection and outlier detection
+    data_analysis(dataloader)
 
-    # Calibrate data and create tables
-    X, Y = data_calibration(dataloader)
+    # Linear classification
 
-    # Select subset(?)
-
-    # Create training and test set
-
-    # PCA analysis
+    # Non-linear classification
 
 if __name__ == '__main__':
     main()
