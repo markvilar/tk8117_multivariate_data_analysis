@@ -52,27 +52,27 @@ def kernel_pca_inspection(X: np.ndarray, Y: np.ndarray, n_comps: int, kernel: st
             cmap=cmap, norm=norm)
     cb = plt.colorbar(scat, spacing='proportional', ticks=bounds)
     cb.set_label('Classes')
-    plt.title('Scores plot')
+    plt.title('Scores plot (KPCA, {} kernel)'.format(kernel))
     plt.xlabel('PC1 ({:.2f}% eigenvalue ratio)'.format(eigen_ratios[0]*100))
     plt.ylabel('PC2 ({:.2f}% eigenvalue ratio)'.format(eigen_ratios[1]*100))
 
     # 3D scores plot
     fig = plt.figure(num=7, figsize=(8,6))
     ax = fig.add_subplot(111, projection='3d')
-    scat = ax.scatter(scores[:,0], scores[:,1], scores[:,2], c=Y, s=1,
+    scat = ax.scatter(scores[:,0], scores[:,1], scores[:,2], c=Y, s=2,
             cmap=cmap, norm=norm)
     cb = plt.colorbar(scat, spacing='proportional', ticks=bounds)
     cb.set_label('Classes')
-    ax.set_title('Scores plot')
+    ax.set_title('Scores plot (KPCA, {} kernel)'.format(kernel))
     ax.set_xlabel('PC1 ({:.2f}% eigenvalue ratio)'.format(eigen_ratios[0]*100))
     ax.set_ylabel('PC2 ({:.2f}% eigenvalue ratio)'.format(eigen_ratios[1]*100))
     ax.set_zlabel('PC3 ({:.2f}% eigenvalue ratio)'.format(eigen_ratios[2]*100))
 
     plt.show()
 
-def pca_inspection(X: np.ndarray, Y: np.ndarray):
+def pca_inspection(X: np.ndarray, Y: np.ndarray, n_comps: int):
     n_classes = len(np.unique(Y))
-    pca = decomposition.PCA()
+    pca = decomposition.PCA(n_components=n_comps)
     scores = pca.fit_transform(X)
     loadings = pca.components_
     var_ratios = pca.explained_variance_ratio_
@@ -92,7 +92,7 @@ def pca_inspection(X: np.ndarray, Y: np.ndarray):
     plt.title('Explained variance')
     plt.xlabel('Principal components')
     plt.ylabel('Cumulative explained variance')
-    plt.xlim((0, 8))
+    plt.xlim((0, n_comps))
     plt.ylim((0, 1))
 
     # Loadings plot
@@ -114,18 +114,18 @@ def pca_inspection(X: np.ndarray, Y: np.ndarray):
             cmap=cmap, norm=norm)
     cb = plt.colorbar(scat, spacing='proportional', ticks=bounds)
     cb.set_label('Classes')
-    plt.title('Scores plot')
+    plt.title('Scores plot (PCA)')
     plt.xlabel('PC1 ({:.2f}% explained variance)'.format(var_ratios[0]*100))
     plt.ylabel('PC2 ({:.2f}% explained variance)'.format(var_ratios[1]*100))
 
     # 3D scores plot
     fig = plt.figure(num=8, figsize=(8,6))
     ax = fig.add_subplot(111, projection='3d')
-    scat = ax.scatter(scores[:,0], scores[:,1], scores[:,2], c=Y, s=1,
+    scat = ax.scatter(scores[:,0], scores[:,1], scores[:,2], c=Y, s=2,
             cmap=cmap, norm=norm)
     cb = plt.colorbar(scat, spacing='proportional', ticks=bounds)
     cb.set_label('Classes')
-    ax.set_title('Scores plot')
+    ax.set_title('Scores plot (PCA)')
     ax.set_xlabel('PC1 ({:.2f}% explained variance)'.format(var_ratios[0]*100))
     ax.set_ylabel('PC2 ({:.2f}% explained variance)'.format(var_ratios[1]*100))
     ax.set_zlabel('PC3 ({:.2f}% explained variance)'.format(var_ratios[2]*100))
@@ -178,22 +178,22 @@ def pls_inspection(X: np.ndarray, Y: np.ndarray, n_comps: int):
 
     # 2D scores plot
     plt.figure(num=7, figsize=(8,6))
-    scat = plt.scatter(scores[:,0], scores[:,1], c=Y, s=1,
+    scat = plt.scatter(scores[:,0], scores[:,1], c=Y, s=2,
             cmap=cmap, norm=norm)
     cb = plt.colorbar(scat, spacing='proportional', ticks=bounds)
     cb.set_label('Classes')
-    plt.title('Scores plot')
+    plt.title('Scores plot (PLS)')
     plt.xlabel('PC1 ({:.2f}% explained variance)'.format(var_ratios[0]*100))
     plt.ylabel('PC2 ({:.2f}% explained variance)'.format(var_ratios[1]*100))
 
     # 3D scores plot
     fig = plt.figure(num=8, figsize=(8,6))
     ax = fig.add_subplot(111, projection='3d')
-    scat = ax.scatter(scores[:,0], scores[:,1], scores[:,2], c=Y, s=1,
+    scat = ax.scatter(scores[:,0], scores[:,1], scores[:,2], c=Y, s=2,
             cmap=cmap, norm=norm)
     cb = plt.colorbar(scat, spacing='proportional', ticks=bounds)
     cb.set_label('Classes')
-    ax.set_title('Scores plot')
+    ax.set_title('Scores plot (PLS)')
     ax.set_xlabel('PC1 ({:.2f}% explained variance)'.format(var_ratios[0]*100))
     ax.set_ylabel('PC2 ({:.2f}% explained variance)'.format(var_ratios[1]*100))
     ax.set_zlabel('PC3 ({:.2f}% explained variance)'.format(var_ratios[2]*100))

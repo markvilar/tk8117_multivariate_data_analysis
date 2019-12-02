@@ -6,20 +6,8 @@ from mpl_toolkits import mplot3d
 
 from dataloader import Dataloader
 from plotting import data_inspection, pca_inspection, pls_inspection, kernel_pca_inspection
-from preprocess import create_tables, data_preprocess, remove_class
-from classifiers import lda, svm
-
-def linear_classification(X_train: np.ndarray, Y_train: np.ndarray, X_test: np.ndarray,
-        Y_test: np.ndarray):
-    # Create k-folds
-    # PCA - CV
-    # LDA - CV
-    # LDA - test
-    #lda(X_train, Y_train, X_test, Y_test)
-    raise NotImplementedError
-
-def nonlinear_classification():
-    raise NotImplementedError
+from preprocess import create_table, create_test_set, data_preprocess, remove_class, resample_dataset
+from classification import linear_classification, svm_cross_validation, svm_classification
 
 def main():
     # Set seed for reproducability
@@ -32,18 +20,24 @@ def main():
     labels_file = 'indian_pines_gt.mat'
     dataloader = Dataloader(dir_path, data_file, cali_file, labels_file)
 
-    # Create training and test set
+    # Create tables, resample and create test set
     X = dataloader.get_calibrated_samples()
     Y = dataloader.get_labels()
-    X_train, Y_train, X_test, Y_test = create_tables(X, Y, test_frac=0.30)
+    X = create_table(X)
+    Y = create_table(Y)
+    X, Y = resample_dataset(X, Y, 4.0)
+    X_train, Y_train, X_test, Y_test = create_test_set(X, Y, test_frac=0.30)
 
     # Data inspection
-    #W = dataloader.get_wave_lengths()
+    W = dataloader.get_wave_lengths()
     #data_inspection(W, X_train[0:500,:], Y_train[0:500], 17, 1, (8,6), 
             #'Radiance Spectra Samples', 'Wave Length [nm]', 'Radiance [Wm^(-2)sr^(-1)]')
     
     # Remove class
-    X_train, Y_train = remove_class(X_train, Y_train, 0)
+    #X_train, Y_train = remove_class(X_train, Y_train, 0)
+    #X_test, Y_test = remove_class(X_test, Y_test, 0)
+    #Y_train[Y_train==16] = 0
+    #Y_test[Y_test==16] = 0
 
     # Data preprocess
     avg_window = 5
@@ -64,13 +58,28 @@ def main():
     W = dataloader.get_wave_lengths(subset_inds)
 
     # PCA inspection
-    pls_inspection(X_train, Y_train, n_comps=8)
-    #pca_inspection(X_train, Y_train)
-    #kernel_pca_inspection(X_train, Y_train, 8, 'cosine')
+    inspection = ''
+    if inspection == 'pls':
+        pls_inspection(X_train, Y_train, n_comps=8)
+    elif inspection == 'pca':
+        pca_inspection(X_train, Y_train, n_comps=None)
+    elif inspection == 'kpca':
+        kernel_pca_inspection(X_train, Y_train, 8, 'linear')
+
     # Linear classification
-    linear_classification(X_train, Y_train, X_test, Y_test)
+    #linear_classification(X_train, Y_train, X_test, Y_test, n_folds=5, n_comps_max=10, 
+            #threshold=0.90, show_plot=True, fignum=2, figsize=(8,6), normalize=False)
 
     # Non-linear classification
+    gamma_min = 1e-5 #1e-5
+    gamma_max = 3e-1 #3e-1
+    n_gammas = 30 #30
+    gammas = np.linspace(gamma_min, gamma_max, n_gammas)
+    #best_gamma = svm_cross_validation(X_train, Y_train, n_folds=5, kernel='rbf', 
+            #gammas=gammas)
+    best_gamma = gammas[7]
+    svm_classification(X_train, Y_train, X_test, Y_test, kernel='rbf', gamma=best_gamma)
+    
 
 if __name__ == '__main__':
     main()

@@ -66,17 +66,17 @@ def create_table(x: np.ndarray) -> np.ndarray:
         return x.reshape(-1)
     return x.reshape(-1, x.shape[-1])
 
-def create_test_set(X: np.ndarray, Y: np.ndarray, frac: float) -> Tuple[np.ndarray]:
+def create_test_set(X: np.ndarray, Y: np.ndarray, test_frac: float) -> Tuple[np.ndarray]:
     assert X.ndim == 2, "X must be a 2D array."
     assert Y.ndim == 1, "Y must be a 1D array."
-    assert frac < 1 or frac > 0, "Invalid test set fraction."
+    assert test_frac < 1 or tes_frac > 0, "Invalid test set fraction."
     classes = np.unique(Y)
     inds = np.arange(X.shape[0], dtype=int)
     test_inds = []
     for c in classes:
         c_inds = np.where(Y==c)[0]
         n = int(c_inds.shape[0])
-        n_test = int(np.floor(n*frac))
+        n_test = int(np.floor(n*test_frac))
         test_inds += (np.random.choice(c_inds, n_test, replace=False)).tolist()
     test_inds = np.array(test_inds, dtype=int)
     train_inds = np.setdiff1d(inds, test_inds)
@@ -110,4 +110,20 @@ def create_tables(X: np.ndarray, Y: np.ndarray, test_frac):
     return X_train, Y_train, X_test, Y_test
 
 def remove_class(X: np.ndarray, Y: np.ndarray, label: int):
-    raise NotImplementedError
+    inds = np.where(Y!=label)[0]
+    to_remove = np.where(Y==label)[0]
+    return np.take(X, inds, axis=0), np.take(Y, inds, axis=0)
+
+def resample_dataset(X: np.ndarray, Y: np.ndarray, scale: float):
+    classes, counts = np.unique(Y, return_counts=True)
+    threshold = int(np.ceil(scale*np.min(counts)))
+    inds = []
+    for c, count in zip(classes, counts):
+        c_inds = np.where(Y==c)[0]
+        if count > threshold:
+            count = threshold
+        inds += (np.random.choice(c_inds, count, replace=False)).tolist()
+    inds = np.array(inds, dtype=int)
+    X_resampled = np.take(X, inds, axis=0)
+    Y_resampled = np.take(Y, inds, axis=0)
+    return X_resampled, Y_resampled
