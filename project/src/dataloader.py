@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from typing import Dict, Tuple
 
 from utilities import remove_dict_keys
+from preprocess import subset_selection
 
 class Dataloader():
     def __init__(self, dir_path: str, data_file: str, cali_file: str, labels_file: str):
@@ -55,6 +56,12 @@ class Dataloader():
 
     def get_labels(self) -> np.ndarray:
         return self._labels.copy()
+
+    def get_wave_lengths(self, indices: np.ndarray=np.array([], dtype=int)):
+        wls = np.squeeze(self.get_calibration('centers'))
+        if indices.size != 0:
+            wls = np.squeeze(subset_selection(wls[np.newaxis,:], indices))
+        return wls
 
     def get_calibrated_samples(self):
         # Rawdata
