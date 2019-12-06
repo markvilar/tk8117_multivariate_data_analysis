@@ -55,7 +55,7 @@ def analyze_results(Y_train: np.ndarray, Yhat_train: np.ndarray, probs_train: np
     plt.show()
 
 def linear_classification(X: np.ndarray, Y: np.ndarray, X_test: np.ndarray,
-        Y_test: np.ndarray, n_folds: int, n_comps_max: int, threshold: float, show_plot: bool,
+        Y_test: np.ndarray, n_folds: int, n_comps_max: int, threshold: float, show_plots: bool,
         fignum: int, figsize: Tuple[int, int], normalize: bool):
     # Create k-folds
     kf = KFold(n_splits=n_folds)
@@ -70,7 +70,7 @@ def linear_classification(X: np.ndarray, Y: np.ndarray, X_test: np.ndarray,
     cum_var_means = np.mean(cum_var_ratios, axis=0)
     cum_var_stds = np.std(cum_var_ratios, axis=0)
     # Plot CV explained variance
-    if show_plot:
+    if show_plots:
         plt.figure(num=fignum, figsize=figsize)
         plt.errorbar(np.arange(0, n_comps_max+1), cum_var_means, yerr=cum_var_stds, ecolor='r')
         plt.title('Explained Variance ({:d}-fold CV)'.format(n_folds))
@@ -86,7 +86,7 @@ def linear_classification(X: np.ndarray, Y: np.ndarray, X_test: np.ndarray,
     # PCA model
     pca_model = decomposition.PCA(n_components=n_comps)
     train_scores = pca_model.fit_transform(X)
-    if show_plot:
+    if show_plots:
         pca_inspection(X, Y, n_comps)
     test_scores = pca_model.transform(X_test)
     # LDA model
@@ -102,7 +102,7 @@ def linear_classification(X: np.ndarray, Y: np.ndarray, X_test: np.ndarray,
             normalize=normalize)
 
 def svm_cross_validation(X: np.ndarray, Y: np.ndarray, n_folds: int, kernel: str, 
-        gammas: np.ndarray,decision: str='ovr'):
+        gammas: np.ndarray, show_plots: bool, decision: str='ovr'):
     kf = KFold(n_splits=n_folds, shuffle=True)
     n_gammas = gammas.shape[0]
     val_accs = np.zeros((n_folds, n_gammas))
@@ -126,20 +126,21 @@ def svm_cross_validation(X: np.ndarray, Y: np.ndarray, n_folds: int, kernel: str
     mean_losses = np.mean(val_losses, axis=0)
     std_losses = np.std(val_losses, axis=0)
 
-    fig = plt.figure(1, (8,8))
-    ax1 = fig.add_subplot(2, 1, 1)
-    ax1.errorbar(gammas, mean_accs, yerr=std_accs, ecolor='r')
-    ax1.set_title('Accuracy ({:d}-fold CV)'.format(n_folds))
-    ax1.set_ylabel('Accuracy [-]')
-    ax1.set_xlabel('Gamma [-]')
-    ax1.set_xlim(gammas[0], gammas[-1])
-    ax2 = fig.add_subplot(2, 1, 2)
-    ax2.errorbar(gammas, mean_losses, yerr=std_losses, ecolor='r')
-    ax2.set_title('Cross entropy loss ({:d}-fold CV)'.format(n_folds))
-    ax2.set_ylabel('Cross entropy [-]')
-    ax2.set_xlabel('Gamma [-]')
-    ax2.set_xlim(gammas[0], gammas[-1])
-    plt.show()
+    if show_plots:
+        fig = plt.figure(1, (8,8))
+        ax1 = fig.add_subplot(2, 1, 1)
+        ax1.errorbar(gammas, mean_accs, yerr=std_accs, ecolor='r')
+        ax1.set_title('Accuracy ({:d}-fold CV)'.format(n_folds))
+        ax1.set_ylabel('Accuracy [-]')
+        ax1.set_xlabel('Gamma [-]')
+        ax1.set_xlim(gammas[0], gammas[-1])
+        ax2 = fig.add_subplot(2, 1, 2)
+        ax2.errorbar(gammas, mean_losses, yerr=std_losses, ecolor='r')
+        ax2.set_title('Cross entropy loss ({:d}-fold CV)'.format(n_folds))
+        ax2.set_ylabel('Cross entropy [-]')
+        ax2.set_xlabel('Gamma [-]')
+        ax2.set_xlim(gammas[0], gammas[-1])
+        plt.show()
 
     best_gamma = gammas[np.argmin(mean_losses)]
     return best_gamma

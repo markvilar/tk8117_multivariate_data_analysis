@@ -6,8 +6,10 @@ import numpy as np
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+from sklearn import decomposition
 
 from typing import Tuple, Dict
+
 
 def data_preprocess(X_train: np.ndarray, X_test: np.ndarray, w: int, subset_inds: np.ndarray,
         do_smoothing: bool, do_subset: bool, do_snv: bool, do_normalize: bool):
@@ -127,3 +129,74 @@ def resample_dataset(X: np.ndarray, Y: np.ndarray, scale: float):
     X_resampled = np.take(X, inds, axis=0)
     Y_resampled = np.take(Y, inds, axis=0)
     return X_resampled, Y_resampled
+
+def hotellings_t2(X: np.ndarray, Y: np.ndarray, alpha: float, return_outliers: bool, show: bool,
+        fig_num: int, fig_size: Tuple[int, int]):
+    # PCA 
+    model = decomposition.PCA(n_components=2)
+    scores = model.fit_transform(X)
+    angles = np.arctan2(scores[:,1], scores[:,0])
+    radii = np.linalg.norm(scores, axis=1)
+    # Make circles
+    thetas = np.concatenate((np.linspace(-np.pi, np.pi, 50), np.linspace(np.pi, -np.pi, 50)))
+    circle = np.array((np.cos(thetas), np.sin(thetas)))
+    # Compute 1-alpha ellipse
+    sigmas = np.cov(np.array((scores[:,0], scores[:,1])))
+    ci = np.sqrt(scipy.stats.chi2.ppf(1-alpha, 2))
+    ellipse = np.transpose(circle).dot(np.linalg.cholesky(sigmas)*ci)
+    a, b = np.max(ellipse[:,0]), np.max(ellipse[:,1])
+    t = np.linspace(0, 2*np.pi, 100)
+    # Calculate outliers
+    indices = np.arange(X.shape[0])
+    ss = np.sin(angles)
+    cs = np.cos(angles)
+    ellipse_radii = a*b/np.sqrt(a*a*ss*ss + b*b*cs*cs)
+    outliers = np.squeeze(np.argwhere(radii > ellipse_radii))
+    inliers = np.setdiff1d(indices, outliers)
+    # Get scores
+    outlier_scores = np.take(scores, outliers, axis=0)
+    inlier_scores = np.take(scores, inliers, axis=0)
+    if show:
+        plt.figure(num=fig_num, figsize=fig_size)
+        outlier_plot = plt.scatter(outlier_scores[:,0], outlier_scores[:,1], s=3, c='Red')
+        inlier_plot = plt.scatter(inlier_scores[:,0], inlier_scores[:,1], s=3, c='Blue')
+        ci_plot, = plt.plot(a*np.cos(t), b*np.sin(t), color='black')
+        plt.grid(color='lightgray', linestyle='--')
+        plt.title('PCA Scores and Hotelling\'s Conf. Bounds')
+        plt.xlabel('PC1')
+        plt.ylabel('PC2')
+        plt.legend([outlier_plot, inlier_plot, ci_plot], 
+                ['Scores (outliers)', 'Scores', 
+                    'Hotelling\'s {:.0f}%-CI bounds'.format((1-alpha)*100)])
+        plt.show()
+
+    if return_outliers:
+        return outliers
+    else:
+        return np.array([])
+
+def inspect_outliers(W: np.ndarray, X: np.ndarray, outliers: np.ndarray):
+    indices = np.arange(X.shape[0])
+    inliers = np.setdiff1d(indices, outliers)
+    Xout = np.take(X, outliers, axis=0)
+    Xin = np.take(X, inliers, axis=0)
+    fig = plt.figure(figsize=(12,6))
+    ax = fig.add_subplot(111)
+    ax.plot(W, Xin.T, c='blue', label='Samples')
+    ax.plot(W, Xout.T, c='red', label='Samples (outliers)')
+    ax.set_title('Preprocessed Samples')
+    ax.set_ylabel('')
+    ax.set_xlabel('Wave lengths [nm]')
+    handles, labels = plt.gca().get_legend_handles_labels()
+    new_handles, new_labels = [], []
+    for handle, label in zip(handles, labels):
+        if label not in new_labels:
+            new_handles.append(handle)
+            new_labels.append(label)
+    plt.legend(new_handles, new_labels)
+    plt.show()
+
+def remove_outliers(X: np.ndarray, Y: np.ndarray, outliers: np.ndarray):
+    indices = np.arange(X.shape[0])
+    inliers = np.setdiff1d(indices, outliers)
+    return np.take(X, inliers, axis=0), np.take(Y, inliers, axis=0)
