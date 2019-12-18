@@ -1,0 +1,10 @@
+Key performance indices:
+- Is the problem clear?
+- Are the assumptions sound?
+- Are the selected algorithms the appropriate ones?
+- Is the model selection sound?
+- Is the validation sound?
+- Are the results bringing new knowledge?
+- How well can you describe the basic bilinear methods (PCA, PLSR) in few word on the whiteboard?
+
+Remember to use both algorithms from our course and some other non-linear approach and then compare the performance (both numberically and in terms of understanding)

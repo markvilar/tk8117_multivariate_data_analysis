@@ -1,0 +1,4 @@
+Filtering
+Derivatives
+Band selection (?)
+Sensor statistics (?)
