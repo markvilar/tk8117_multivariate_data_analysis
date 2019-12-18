@@ -1,5 +1,5 @@
-presentation/
 __pycache__/
+datasets/
 
 *.swp
 *.swm
